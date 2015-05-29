@@ -138,11 +138,14 @@ class LogstashFormatterV1(LogstashFormatter):
 
         if 'msg' in fields and not 'message' in fields:
             msg = fields.pop('msg')
+            fields['message'] = ''
+
             try:
-                msg = msg.format(**fields)
-            except KeyError:
-                pass
-            fields['message'] = msg
+                fields['message'] = msg.format(**fields)
+            except AttributeError:
+                for k,v in msg.items():
+                    if not k in fields or k == 'message':
+                        fields[k] = v
 
         if 'exc_info' in fields:
             if fields['exc_info']:
